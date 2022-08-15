@@ -4,6 +4,7 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { theme } from '../lib/theme';
 import type { AppProps } from 'next/app';
+import { RecoilRoot } from 'recoil';
 
 export default function(props: AppProps) {
   const { Component, pageProps } = props;
@@ -22,7 +23,9 @@ export default function(props: AppProps) {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <RecoilRoot>
         <Component {...pageProps} />
+        </RecoilRoot>
       </ThemeProvider>
     </React.Fragment>
   );
