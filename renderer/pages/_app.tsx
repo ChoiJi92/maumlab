@@ -5,7 +5,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { theme } from '../lib/theme';
 import type { AppProps } from 'next/app';
 import { RecoilRoot } from 'recoil';
-
 export default function(props: AppProps) {
   const { Component, pageProps } = props;
 

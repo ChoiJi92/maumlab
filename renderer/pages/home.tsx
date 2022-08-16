@@ -112,6 +112,7 @@ const InputWrap = styled.div`
     border-radius: 7px;
     color: white;
     font-size: 1.2rem;
+    cursor: pointer;
   }
   div {
     display: flex;
