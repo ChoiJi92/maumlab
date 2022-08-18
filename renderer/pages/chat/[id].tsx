@@ -1,31 +1,32 @@
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { signOut } from "firebase/auth";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef } from "react";
+import { useQuery } from "react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 import Menu from "../../components/Menu";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { chatList, currentUser } from "../../recoil/atom";
 
 const Chat = () => {
   const router = useRouter();
-  const { id } = router.query;
+  const { roomId, roomName } = router.query;
   const [user, setUser] = useRecoilState(currentUser);
   const [chat, setChat] = useRecoilState(chatList);
   const chatBoxRef = useRef<HTMLDivElement>();
   const inputRef = useRef<HTMLInputElement>(null);
-  const socket = useRef(null)
+  const socket = useRef(null);
   const scrollToBottom = () => {
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
   };
-  const roomName = id + user;
   useEffect(() => {
     socket.current = io("http://localhost:3000");
-    socket.current.emit("join-room", 1, user);
+    socket.current.emit("join-room", roomId, user);
     socket.current.on("welcome", (nickname: string) => {
       //   setChat([
       //     ...chat,
@@ -36,29 +37,39 @@ const Chat = () => {
       socket.current.disconnect();
     };
   }, []);
+  const { data } = useQuery(
+    ["loadChat",roomId],
+    async () => {
+      console.log(roomId)
+      //   const q = query(
+      //     collection(db, "chat"),
+      //     // where("id", "==", roomId),
+      //     // orderBy("date", "asc")
+      //   );
+      //   const chatData = await getDocs(q);
+      //   let chat_list = [];
+      //   chatData.forEach((doc) => {
+      //     console.log(doc.data());
+      //     chat_list.push({ ...doc.data() });
+      //   });
+      //  return setChat([...chat_list]);
+   
+    },
+    {
+      enabled:!!roomId,
+      refetchOnWindowFocus: false,
+    }
+  );
   useEffect(() => {
     socket.current.on("message", (messageChat: string, user: string) => {
       setChat([...chat, { messageChat, user }]);
     });
     scrollToBottom();
-    //   socket.on("welcome", (nickname:string) => {
-    //       console.log('socket',nickname)
-    //     setChat([
-    //       ...chat,
-    //       { messageChat: `${nickname}님이 입장하셨습니다.`, user: "system" },
-    //     ]);
-    //   });
-    //   socket.on("bye", (nickname:string) => {
-    //     setChat([
-    //       ...chat,
-    //       { messageChat: `${nickname}님이 퇴장하셨습니다.`, user: "system" },
-    //     ]);
-    //   });
   }, [chat]);
-  console.log(chat)
+  console.log(chat);
   const sendMessage = (message: string) => {
     if (message !== "") {
-      socket.current.emit("chat_message", message, user, 1);
+      socket.current.emit("chat_message", message, user, roomId);
       setChat([...chat, { messageChat: message, user: user }]);
       inputRef.current.value = "";
     }
@@ -70,7 +81,7 @@ const Chat = () => {
       }
     }
   };
- 
+
   return (
     <Container>
       <Menu />
@@ -78,7 +89,7 @@ const Chat = () => {
         <div className="header">
           <div>
             <img src="/images/profile.png"></img>
-            <p>{id}</p>
+            <p>{roomName}</p>
           </div>
           <div>
             <button
@@ -187,6 +198,7 @@ const ChatList = styled.div`
     flex-direction: column;
     align-items: flex-start;
     p {
+      margin-top: 0;
       margin-bottom: 5px;
     }
     div {

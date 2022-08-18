@@ -1,7 +1,15 @@
 import { signOut } from "firebase/auth";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
+import { useMutation, useQueryClient } from "react-query";
 import { useRecoilState } from "recoil";
 import styled from "styled-components";
 import Link from "../components/Link";
@@ -13,20 +21,78 @@ const Main = () => {
   const [user, setUser] = useRecoilState(currentUser);
   const [userLists, setUserLists] = useRecoilState(userList);
   const router = useRouter();
+  // const nickName = localStorage.getItem("nickName");
   useEffect(() => {
     const loadUser = async () => {
       const docRef = collection(db, "users");
       console.log(user, "현재 유저");
       const q = query(docRef, where("name", "!=", user));
       let userList: string[] = [];
-      const nickName = await getDocs(q);
-      nickName.forEach((doc) => {
+      const nickname = await getDocs(q);
+      nickname.forEach((doc) => {
         userList.push(doc.data().name);
       });
       setUserLists([...userList]);
     };
     loadUser();
   }, []);
+  const queryClient = useQueryClient();
+  const createRoom = useMutation(
+    ["createRoom"],
+    async (data: data) => {
+      const q = query(
+        collection(db, "room")
+        // where("userList", "==", data.userList)
+      );
+      const roomData = await getDocs(q);
+      let roomId: string;
+      let roomName: string;
+      roomData.forEach((doc) => {
+        if (
+          doc.data().userList.includes(user) &&
+          doc.data().userList.includes(data.roomName)
+        ) {
+          roomId = doc.id;
+          roomName = doc.data().userList.filter((v:string)=>v !== user);
+        }
+      });
+      if (roomId) {
+        router.push({
+          pathname: `/chat/${roomId}`,
+          query: { roomId: roomId, roomName: roomName[0] },
+        });
+      } else {
+        console.log("여기 엘스문");
+        const docRef = await addDoc(collection(db, "room"), data);
+        const room = await getDoc(docRef);
+        const roomData : any = { id: room.id, ...room.data() };
+        const roomId = roomData.id
+        const roomName = roomData.userList.filter((v:string)=>v !== user)
+        router.push({
+          pathname: `/chat/${roomId}`,
+          query: { roomId: roomId, roomName: roomName[0] },
+        });
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("content");
+      },
+    }
+  );
+  interface data {
+    roomName: string;
+    userList: string[];
+    max: number;
+  }
+  const createPrivateRoom = (v: string) => {
+    const data = {
+      roomName: v,
+      userList: [v, user],
+      max: 2,
+    };
+    createRoom.mutate(data);
+  };
   return (
     <Container>
       <Menu />
@@ -47,9 +113,13 @@ const Main = () => {
           </button>
         </Header>
         {userLists.map((v) => (
-          <div className="user" key={v} onClick={()=>{
-            router.push(`/chat/${v}`)
-          }}>
+          <div
+            className="user"
+            key={v}
+            onClick={() => {
+              createPrivateRoom(v);
+            }}
+          >
             <img src="/images/profile.png" alt="프로필"></img>
             <p>{v}</p>
           </div>
@@ -69,7 +139,7 @@ const Wrap = styled.div`
     flex-direction: row;
     align-items: center;
   }
-  .user{
+  .user {
     margin-bottom: 10px;
     margin-left: 20px;
     cursor: pointer;
@@ -81,8 +151,11 @@ const Wrap = styled.div`
     border: 1px solid;
     margin-right: 5px;
   }
-  p{
+  p {
     font-size: 1rem;
+    margin-right: 10px;
+  }
+  button {
   }
 `;
 const Header = styled.div`
@@ -94,17 +167,17 @@ const Header = styled.div`
   justify-content: flex-end;
   padding: 0 10px;
   margin-bottom: 10px;
-  p{
+  p {
     font-size: 1rem;
     margin-right: 10px;
   }
-  button{
+  button {
     border: none;
     background-color: transparent;
     font-size: 1rem;
     cursor: pointer;
-    :hover{
-        color: #ff6161;
+    :hover {
+      color: #ff6161;
     }
   }
 `;
