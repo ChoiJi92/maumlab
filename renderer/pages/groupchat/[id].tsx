@@ -1,19 +1,18 @@
-import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { signOut } from "firebase/auth";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef } from "react";
-import { useQuery } from "react-query";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 import Menu from "../../components/Menu";
 import { auth, db } from "../../firebase";
 import { chatList, currentUser } from "../../recoil/atom";
+import PersonIcon from "@mui/icons-material/Person";
 
-const Chat = () => {
+const GroupChat = () => {
   const router = useRouter();
-  const { roomId, roomName } = router.query;
+  const { roomId, userCount } = router.query;
   const [user, setUser] = useRecoilState(currentUser);
   const [chat, setChat] = useRecoilState(chatList);
   const chatBoxRef = useRef<HTMLDivElement>();
@@ -27,20 +26,14 @@ const Chat = () => {
   useEffect(() => {
     socket.current = io("http://localhost:3000");
     socket.current.emit("join-room", roomId, user);
-    socket.current.on("welcome", (nickname: string) => {
-      //   setChat([
-      //     ...chat,
-      //     { messageChat: `${nickname}님이 입장하셨습니다.`, user: "system" },
-      //   ]);
-    });
     return () => {
       socket.current.disconnect();
     };
   }, []);
-  useEffect(()=>{
-    const loadChat = async()=>{
-      try{
-         const q = query(
+  useEffect(() => {
+    const loadChat = async () => {
+      try {
+        const q = query(
           collection(db, "chat"),
           where("id", "==", roomId),
           orderBy("date", "asc")
@@ -50,13 +43,14 @@ const Chat = () => {
         chatData.forEach((doc) => {
           chat_list.push({ ...doc.data() });
         });
-       return setChat([...chat_list]);
-    }catch(err){
-      return setChat([])
-    }}
-    loadChat()
-  },[])
- 
+        return setChat([...chat_list]);
+      } catch (err) {
+        return setChat([]);
+      }
+    };
+    loadChat();
+  }, []);
+
   useEffect(() => {
     socket.current.on("message", (messageChat: string, user: string) => {
       setChat([...chat, { messageChat, user }]);
@@ -83,9 +77,9 @@ const Chat = () => {
       <Menu />
       <Wrap>
         <div className="header">
-          <div>
-            <img src="/images/profile.png"></img>
-            <p>{roomName}</p>
+          <div className="user">
+            <PersonIcon />
+            <p>{userCount}</p>
           </div>
           <div>
             <button
@@ -171,14 +165,9 @@ const Wrap = styled.div`
         color: #ff6161;
       }
     }
-    img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 1px solid;
-      margin-right: 10px;
-    }
     p {
+      margin: 0 0 0 5px;
+      padding-top: 2px;
       font-size: 0.9rem;
     }
   }
@@ -194,8 +183,7 @@ const ChatList = styled.div`
     flex-direction: column;
     align-items: flex-start;
     p {
-      margin-top: 0;
-      margin-bottom: 5px;
+      margin: 5px 0;
     }
     div {
       border-radius: 6px 20px 20px 20px;
@@ -247,4 +235,4 @@ const InputWrap = styled.div`
     font-size: 1rem;
   }
 `;
-export default Chat;
+export default GroupChat;

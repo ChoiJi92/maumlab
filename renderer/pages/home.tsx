@@ -46,9 +46,6 @@ function Home() {
       }
       )
       setUser(currentuser)
-      console.log(localStorage === window.localStorage)
-      localStorage.setItem('nickName',currentuser)
-      localStorage.setItem('id',id.current.value)
       router.push('/main')
     } catch {
       window.alert("아이디와 비밀번호를 확인해 주세요 :)");

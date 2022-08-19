@@ -57,16 +57,25 @@ if (isProd) {
       nodeIntegration: true,
     },
   });
-
+  const thirdWindow = createWindow("main", {
+    width: 1000,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
   if (isProd) {
     await mainWindow.loadURL("app://./home.html");
     await subWindow.loadURL("app://./home.html");
+    await thirdWindow.loadURL("app://./home.html");
   } else {
     const port = process.argv[2];
     await mainWindow.loadURL(`http://localhost:${port}/home`);
     await subWindow.loadURL(`http://localhost:${port}/home`);
+    await thirdWindow.loadURL(`http://localhost:${port}/home`);
     mainWindow.webContents.openDevTools();
     subWindow.webContents.openDevTools();
+    thirdWindow.webContents.openDevTools();
   }
 })();
 
