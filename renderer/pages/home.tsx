@@ -45,6 +45,8 @@ function Home() {
           currentuser = doc.data().name
       }
       )
+      localStorage.setItem('id', id.current.value)
+      localStorage.setItem('nickName', currentuser)
       setUser(currentuser)
       router.push('/main')
     } catch {

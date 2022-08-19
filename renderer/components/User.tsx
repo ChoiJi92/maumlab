@@ -30,7 +30,7 @@ const User = () => {
       setUserLists([...userList]);
     };
     loadUser();
-  }, []);
+  }, [user]);
   const createPrivateRoom = async (v: string) => {
     const data = {
       roomName: v,
@@ -85,13 +85,13 @@ const User = () => {
 };
 
 const Container = styled.div`
+  width: 50%;
   display: flex;
   flex-direction: row;
   align-items: center;
   margin-bottom: 10px;
   margin-left: 20px;
   cursor: pointer;
-
   img {
     width: 50px;
     height: 50px;
@@ -102,6 +102,11 @@ const Container = styled.div`
   p {
     font-size: 1rem;
     margin-right: 10px;
+  }
+  :hover{
+    p{
+        color:#ff6161
+    }
   }
 `;
 export default User;

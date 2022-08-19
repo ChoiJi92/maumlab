@@ -15,15 +15,15 @@ const PrivateChat = () => {
       const docRef = collection(db, "room");
       const q = query(docRef, where("userList", "array-contains", user));
       interface room {
-        id:string,
-        roomName:string
+        id: string;
+        roomName: string;
       }
-      let roomList: room[]=[]
+      let roomList: room[] = [];
       const room = await getDocs(q);
       room.forEach((doc) => {
         roomList.push({
           id: doc.id,
-          roomName : doc.data().userList.filter((v: string) => v !== user)[0]
+          roomName: doc.data().userList.filter((v: string) => v !== user)[0],
         });
       });
       setRoomLists([...roomList]);
@@ -33,10 +33,15 @@ const PrivateChat = () => {
   return (
     <>
       {roomLists.map((v) => (
-        <Container key={v.id} onClick={() => { router.push({
-            pathname: `/chat/${v.id}`,
-            query: { roomId: v.id, roomName: v.roomName },
-          })}}>
+        <Container
+          key={v.id}
+          onClick={() => {
+            router.push({
+              pathname: `/chat/${v.id}`,
+              query: { roomId: v.id, roomName: v.roomName },
+            });
+          }}
+        >
           <img src="/images/profile.png" alt="프로필"></img>
           <p>{v.roomName}님과의 대화방</p>
         </Container>
@@ -63,6 +68,11 @@ const Container = styled.div`
   p {
     font-size: 1rem;
     margin-right: 10px;
+  }
+  :hover {
+    p {
+      color: #ff6161;
+    }
   }
 `;
 export default PrivateChat;

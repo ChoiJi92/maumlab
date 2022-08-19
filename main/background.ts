@@ -14,21 +14,19 @@ const io = new Server(3000, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("join-room", (roomName, user) => {
-    console.log(roomName, user);
-    socket.join(roomName);
-    socket.emit("welcome", user);
+  socket.on("join-room", (roomId) => {
+    socket.join(roomId);
   });
-  socket.on("chat_message", async (message, user, roomName) => {
+  socket.on("chat_message", async (message, user, roomId) => {
     const date = moment().format('YYYY-MM-DD HH:mm:ss');
     const data ={
-      id:roomName,
+      id:roomId,
       messageChat:message,
       user:user,
       date:date
     }
    await addDoc(collection(db, "chat"), data);
-    socket.to(roomName).emit("message", message, user);
+    socket.to(roomId).emit("message", message, user);
   });
 });
 
@@ -50,32 +48,13 @@ if (isProd) {
       nodeIntegration: true,
     },
   });
-  const subWindow = createWindow("main", {
-    width: 1000,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true,
-    },
-  });
-  const thirdWindow = createWindow("main", {
-    width: 1000,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true,
-    },
-  });
   if (isProd) {
     await mainWindow.loadURL("app://./home.html");
-    await subWindow.loadURL("app://./home.html");
-    await thirdWindow.loadURL("app://./home.html");
   } else {
     const port = process.argv[2];
     await mainWindow.loadURL(`http://localhost:${port}/home`);
-    await subWindow.loadURL(`http://localhost:${port}/home`);
-    await thirdWindow.loadURL(`http://localhost:${port}/home`);
     mainWindow.webContents.openDevTools();
-    subWindow.webContents.openDevTools();
-    thirdWindow.webContents.openDevTools();
+
   }
 })();
 

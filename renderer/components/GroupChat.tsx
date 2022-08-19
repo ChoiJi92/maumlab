@@ -52,15 +52,20 @@ const GroupChat = () => {
     };
     loadGroupChat();
   }, []);
-  const joinGroupChat = async(data:room)=>{
+  const joinGroupChat = async (data: room) => {
     const docRef = doc(db, "grouproom", data.id);
-    await updateDoc(docRef, {userList :arrayUnion(user)});
+    await updateDoc(docRef, { userList: arrayUnion(user) });
 
     router.push({
-        pathname: `/groupchat/${data.id}`,
-        query: { roomId: data.id, userCount: data.userList.includes(user) ? data.userList.length : data.userList.length +1 },
-      });
-  }
+      pathname: `/groupchat/${data.id}`,
+      query: {
+        roomId: data.id,
+        userCount: data.userList.includes(user)
+          ? data.userList.length
+          : data.userList.length + 1,
+      },
+    });
+  };
   return (
     <Container>
       <button
@@ -74,13 +79,15 @@ const GroupChat = () => {
         <List
           key={v.id}
           onClick={() => {
-            joinGroupChat(v)
+            joinGroupChat(v);
           }}
         >
           <img src="/images/profile.png" alt="프로필"></img>
           <div>
             <p>{v.roomName}</p>
-            <p style={{fontSize:'0.8rem'}}>참여인원 : {v.userList.length}명</p>
+            <p style={{ fontSize: "0.8rem" }}>
+              참여인원 : {v.userList.length}명
+            </p>
           </div>
         </List>
       ))}
@@ -90,8 +97,16 @@ const GroupChat = () => {
 
 const Container = styled.div`
   button {
+    padding: 10px;
+    height: 40px;
     margin-left: 20px;
     margin-bottom: 20px;
+    background-color: #ff6161;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    font-weight: 700;
+    cursor: pointer;
   }
 `;
 const List = styled.div`
@@ -115,6 +130,11 @@ const List = styled.div`
     p {
       margin: 0;
       font-size: 1rem;
+    }
+    :hover {
+      p {
+        color: #ff6161;
+      }
     }
   }
 `;

@@ -1,6 +1,6 @@
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import styled from "styled-components";
 import GroupChat from "../components/GroupChat";
@@ -15,6 +15,10 @@ const Main = () => {
   const [user, setUser] = useRecoilState(currentUser);
   const router = useRouter();
   const [currentMenu, setCurrentMenu] = useRecoilState(menu);
+  useEffect(()=>{
+    let nickName = localStorage.getItem('nickName')
+    setUser(nickName)
+  },[])
   return (
     <Container>
       <Menu />

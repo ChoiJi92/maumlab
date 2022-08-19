@@ -27,17 +27,13 @@ const Chat = () => {
   useEffect(() => {
     socket.current = io("http://localhost:3000");
     socket.current.emit("join-room", roomId, user);
-    socket.current.on("welcome", (nickname: string) => {
-      //   setChat([
-      //     ...chat,
-      //     { messageChat: `${nickname}님이 입장하셨습니다.`, user: "system" },
-      //   ]);
-    });
     return () => {
       socket.current.disconnect();
     };
   }, []);
   useEffect(()=>{
+    let nickName = localStorage.getItem('nickName')
+    setUser(nickName)
     const loadChat = async()=>{
       try{
          const q = query(
@@ -55,7 +51,7 @@ const Chat = () => {
       return setChat([])
     }}
     loadChat()
-  },[])
+  },[roomId])
  
   useEffect(() => {
     socket.current.on("message", (messageChat: string, user: string) => {
@@ -177,6 +173,7 @@ const Wrap = styled.div`
       border-radius: 50%;
       border: 1px solid;
       margin-right: 10px;
+      margin-left: 5px;
     }
     p {
       font-size: 0.9rem;
@@ -218,11 +215,11 @@ const ChatList = styled.div`
     display: flex;
     justify-content: flex-end;
     margin-bottom: 5px;
-    margin-right: 10px;
     div {
       border-radius: 20px 20px 6px 20px;
-      border: 1px solid;
       padding: 5px 10px 5px 10px;
+      background-color: #ff6161;
+      color: white;
     }
   }
 `;

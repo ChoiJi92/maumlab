@@ -31,6 +31,8 @@ const GroupChat = () => {
     };
   }, []);
   useEffect(() => {
+    let nickName = localStorage.getItem('nickName')
+    setUser(nickName)
     const loadChat = async () => {
       try {
         const q = query(
@@ -49,7 +51,7 @@ const GroupChat = () => {
       }
     };
     loadChat();
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
     socket.current.on("message", (messageChat: string, user: string) => {
@@ -150,6 +152,9 @@ const Wrap = styled.div`
     justify-content: space-between;
     border-bottom: 1px solid;
     height: 70px;
+    .user{
+        margin-left: 10px;
+    }
     div {
       display: flex;
       flex-direction: row;
@@ -206,11 +211,11 @@ const ChatList = styled.div`
     display: flex;
     justify-content: flex-end;
     margin-bottom: 5px;
-    margin-right: 10px;
     div {
       border-radius: 20px 20px 6px 20px;
-      border: 1px solid;
       padding: 5px 10px 5px 10px;
+      background-color: #ff6161;
+      color: white;
     }
   }
 `;
