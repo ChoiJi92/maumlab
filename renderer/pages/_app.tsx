@@ -26,6 +26,7 @@ export default function(props: AppProps) {
     <React.Fragment>
       <Head>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+        <title>마음연구소 채팅 프로그램</title>
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
